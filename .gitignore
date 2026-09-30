@@ -1,0 +1,27 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Kubernetes
+*.secret.yaml
+
+# Application
+__pycache__/
+*.pyc
+
+# Helm
+charts/*/charts/
+
+# OS / editor
+.DS_Store
+.vscode/
