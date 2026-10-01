@@ -1,0 +1,16 @@
+ingress:
+  name: eks-devops-ingress
+
+  className: alb
+
+  scheme: internet-facing
+
+  targetType: ip
+
+  backend:
+    serviceName: backend
+    servicePort: 5000
+
+  frontend:
+    serviceName: frontend
+    servicePort: 80

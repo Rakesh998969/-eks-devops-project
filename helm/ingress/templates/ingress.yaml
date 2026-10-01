@@ -1,0 +1,64 @@
+# ==========================================
+# Backend Ingress
+# ==========================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: backend-ingress
+
+  annotations:
+    alb.ingress.kubernetes.io/group.name: eks-devops
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+
+            backend:
+              service:
+                name: {{ .Values.ingress.backend.serviceName }}
+                port:
+                  number: {{ .Values.ingress.backend.servicePort }}
+
+
+---
+
+# ==========================================
+# Frontend Ingress
+# ==========================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: frontend-ingress
+
+  annotations:
+    alb.ingress.kubernetes.io/group.name: eks-devops
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
+
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+
+            backend:
+              service:
+                name: {{ .Values.ingress.frontend.serviceName }}
+                port:
+                  number: {{ .Values.ingress.frontend.servicePort }}

@@ -1,0 +1,11 @@
+clusterName: eks-devops-project-cluster
+
+region: ap-south-1
+
+vpcId: ""
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+
+enableServiceMutatingWebhook: true

@@ -1,0 +1,179 @@
+name: CI - Build Scan and Push
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  AWS_REGION: ap-south-1
+  FRONTEND_ECR_REPOSITORY: eks-devops-project-frontend
+  BACKEND_ECR_REPOSITORY: eks-devops-project-backend
+
+jobs:
+
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+
+  trivy:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+
+  build-and-push:
+    name: Build Scan and Push Images
+    runs-on: ubuntu-latest
+
+    needs:
+      - sonarqube
+      - trivy
+
+    # Only the main branch is allowed to push to AWS/ECR.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+
+      - name: Build backend Docker image
+        run: |
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_ECR_REPOSITORY }}:${{ github.sha }} \
+            ./app/backend
+
+
+      - name: Build frontend Docker image
+        run: |
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_ECR_REPOSITORY }}:${{ github.sha }} \
+            ./app/frontend
+
+
+      - name: Scan backend Docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_ECR_REPOSITORY }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+
+      - name: Scan frontend Docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_ECR_REPOSITORY }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+
+      - name: Push backend image
+        run: |
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_ECR_REPOSITORY }}:${{ github.sha }}
+
+
+      - name: Push frontend image
+        run: |
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_ECR_REPOSITORY }}:${{ github.sha }}
+
+
+      - name: Update Helm image tags
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          sha = "${{ github.sha }}"
+          registry = "${{ steps.login-ecr.outputs.registry }}"
+
+          files = {
+              "helm/backend/values.yaml":
+                  f"{registry}/${{ env.BACKEND_ECR_REPOSITORY }}",
+
+              "helm/frontend/values.yaml":
+                  f"{registry}/${{ env.FRONTEND_ECR_REPOSITORY }}"
+          }
+
+          for filename, repository in files.items():
+              path = Path(filename)
+              content = path.read_text()
+
+              content = re.sub(
+                  r'(?m)^  repository:.*$',
+                  f'  repository: {repository}',
+                  content
+              )
+
+              content = re.sub(
+                  r'(?m)^  tag:.*$',
+                  f'  tag: {sha}',
+                  content
+              )
+
+              path.write_text(content)
+          PY
+
+
+      - name: Commit GitOps image update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add helm/backend/values.yaml
+          git add helm/frontend/values.yaml
+
+          if git diff --cached --quiet; then
+            echo "No GitOps changes detected."
+            exit 0
+          fi
+
+          git commit -m "chore: update image tags to ${GITHUB_SHA}"
+          git push

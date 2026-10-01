@@ -18,6 +18,8 @@ crash.*.log
 # Application
 __pycache__/
 *.pyc
+node_modules/
+dist/
 
 # Helm
 charts/*/charts/
