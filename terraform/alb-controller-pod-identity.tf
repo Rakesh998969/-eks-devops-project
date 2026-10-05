@@ -4,7 +4,7 @@
 # ==========================================
 
 resource "aws_eks_pod_identity_association" "aws_load_balancer_controller" {
-  cluster_name    = aws_eks_cluster.main.name
+  cluster_name    = module.eks.cluster_name
   namespace       = "kube-system"
   service_account = "aws-load-balancer-controller"
 

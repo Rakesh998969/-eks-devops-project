@@ -4,7 +4,7 @@
 
 output "vpc_id" {
   description = "VPC ID"
-  value       = aws_vpc.main.id
+  value       = module.vpc.vpc_id
 }
 
 
@@ -14,7 +14,7 @@ output "vpc_id" {
 
 output "public_subnet_ids" {
   description = "Public subnet IDs"
-  value       = aws_subnet.public[*].id
+  value       = module.vpc.public_subnet_ids
 }
 
 
@@ -24,7 +24,7 @@ output "public_subnet_ids" {
 
 output "private_subnet_ids" {
   description = "Private subnet IDs"
-  value       = aws_subnet.private[*].id
+  value       = module.vpc.private_subnet_ids
 }
 
 
@@ -34,28 +34,26 @@ output "private_subnet_ids" {
 
 output "frontend_ecr_repository_url" {
   description = "Frontend ECR repository URL"
-  value       = aws_ecr_repository.frontend.repository_url
+  value       = module.ecr.frontend_repository_url
 }
 
 output "backend_ecr_repository_url" {
   description = "Backend ECR repository URL"
-  value       = aws_ecr_repository.backend.repository_url
+  value       = module.ecr.backend_repository_url
 }
-
-
 # ==========================================
 # EKS Cluster
 # ==========================================
 
 output "eks_cluster_name" {
   description = "EKS cluster name"
-  value       = aws_eks_cluster.main.name
+  value       = module.eks.cluster_name
 }
 
 
 output "eks_cluster_endpoint" {
   description = "EKS cluster API endpoint"
-  value       = aws_eks_cluster.main.endpoint
+  value       = module.eks.cluster_endpoint
 }
 
 
@@ -65,7 +63,7 @@ output "eks_cluster_endpoint" {
 
 output "eks_node_group_name" {
   description = "EKS managed node group name"
-  value       = aws_eks_node_group.main.node_group_name
+  value       = module.eks.node_group_name
 }
 
 # ==========================================
@@ -74,12 +72,12 @@ output "eks_node_group_name" {
 
 output "rds_endpoint" {
   description = "RDS MySQL endpoint"
-  value       = aws_db_instance.mysql.address
+  value       = module.rds.endpoint
 }
 
 output "rds_port" {
   description = "RDS MySQL port"
-  value       = aws_db_instance.mysql.port
+  value       = module.rds.port
 }
 
 output "github_actions_role_arn" {
@@ -89,5 +87,5 @@ output "github_actions_role_arn" {
 
 output "rds_credentials_secret_arn" {
   description = "AWS Secrets Manager ARN containing RDS credentials"
-  value       = aws_secretsmanager_secret.rds_credentials.arn
+  value       = module.secrets.secret_arn
 }

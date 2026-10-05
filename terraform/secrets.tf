@@ -1,27 +1,12 @@
-# ==========================================
-# RDS Credentials - AWS Secrets Manager
-# ==========================================
+module "secrets" {
+  source = "./modules/secrets"
 
-resource "aws_secretsmanager_secret" "rds_credentials" {
-  name = "${var.project_name}/rds-credentials"
+  project_name = var.project_name
+  environment  = var.environment
 
-  description = "Credentials for the EKS DevOps project RDS database"
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
 
-  tags = {
-    Name        = "${var.project_name}-rds-credentials"
-    Environment = var.environment
-  }
-}
-
-
-resource "aws_secretsmanager_secret_version" "rds_credentials" {
-  secret_id = aws_secretsmanager_secret.rds_credentials.id
-
-  secret_string = jsonencode({
-    username = var.db_username
-    password = var.db_password
-    database = var.db_name
-    host     = aws_db_instance.mysql.address
-    port     = "3306"
-  })
+  rds_endpoint = module.rds.endpoint
 }

@@ -3,7 +3,7 @@
 # ==========================================
 
 resource "aws_eks_pod_identity_association" "external_secrets" {
-  cluster_name    = aws_eks_cluster.main.name
+  cluster_name    = module.eks.cluster_name
   namespace       = "external-secrets"
   service_account = "external-secrets"
 

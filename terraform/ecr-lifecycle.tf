@@ -3,7 +3,7 @@
 # ==========================================
 
 resource "aws_ecr_lifecycle_policy" "frontend" {
-  repository = aws_ecr_repository.frontend.name
+  repository = module.ecr.frontend_repository_name
 
   policy = jsonencode({
     rules = [
@@ -32,7 +32,7 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
 # ==========================================
 
 resource "aws_ecr_lifecycle_policy" "backend" {
-  repository = aws_ecr_repository.backend.name
+  repository = module.ecr.backend_repository_name
 
   policy = jsonencode({
     rules = [

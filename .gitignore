@@ -27,3 +27,6 @@ charts/*/charts/
 # OS / editor
 .DS_Store
 .vscode/
+
+# Local backup files
+*.backup

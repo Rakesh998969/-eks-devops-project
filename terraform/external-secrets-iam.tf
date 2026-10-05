@@ -52,7 +52,7 @@ resource "aws_iam_policy" "external_secrets" {
           "secretsmanager:DescribeSecret"
         ]
 
-        Resource = aws_secretsmanager_secret.rds_credentials.arn
+        Resource = module.secrets.secret_arn
       }
     ]
   })
