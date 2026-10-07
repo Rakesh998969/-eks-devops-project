@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 672937918836.dkr.ecr.ap-south-1.amazonaws.com/eks-devops-project-frontend
-  tag: efa0d3f85450b23352d3de021a4cb43147cd564c
+  tag: 673b8b442b7fa66c0e4fae5beb9f4bbfc890cd32
   pullPolicy: Always
 
 service:
