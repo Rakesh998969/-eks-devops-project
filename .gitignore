@@ -1,32 +1,25 @@
 # Terraform
-.terraform/
+**/.terraform/
 *.tfstate
 *.tfstate.*
-*.tfvars
-*.tfvars.json
+*.tfplan
+tfplan
+planned-resources.txt
 crash.log
 crash.*.log
+.terraform.lock.hcl
 
-# Secrets
+# Terraform variable files containing secrets
+**/terraform.tfvars
+**/*.tfvars
+!**/terraform.tfvars.example
+
+# Environment / secrets
 .env
+.env.*
 *.pem
 *.key
 
-# Kubernetes
-*.secret.yaml
-
-# Application
-__pycache__/
-*.pyc
-node_modules/
-dist/
-
-# Helm
-charts/*/charts/
-
-# OS / editor
+# OS files
 .DS_Store
-.vscode/
-
-# Local backup files
-*.backup
+Thumbs.db

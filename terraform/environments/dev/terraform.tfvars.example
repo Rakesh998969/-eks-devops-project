@@ -1,0 +1,11 @@
+project_name = "eks-devops-project"
+environment  = "dev"
+aws_region   = "ap-south-1"
+
+vpc_cidr = "10.0.0.0/16"
+
+db_name     = "appdb"
+db_username = "appadmin"
+
+# Set the actual password using TF_VAR_db_password
+# Do NOT put the real password in this file.
