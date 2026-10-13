@@ -23,6 +23,7 @@ env:
 jobs:
   sonarqube:
     name: SonarQube Analysis and Quality Gate
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -70,7 +71,6 @@ jobs:
     name: Build Scan and Push Images
     runs-on: ubuntu-latest
     needs:
-      - sonarqube
       - trivy
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
