@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 672937918836.dkr.ecr.ap-south-1.amazonaws.com/eks-devops-project-backend
-  tag: latest
+  tag: 4784a433e83e9b3e8d9cd82b46294f6e1bc0b978
   pullPolicy: Always
 
 service:
